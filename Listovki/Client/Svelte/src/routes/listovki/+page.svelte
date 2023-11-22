@@ -7,6 +7,43 @@
     let sortDownIcon = '/sort-down.svg';
     let sortUpIcon = '/sort-up.svg';
 
+    $: sortById = false;
+    $: sortByCategory = false;
+    $: sortByPoints = false;
+
+    let filterText = '';
+    $: filteredQuestions = questions?.filter(question => question.question.includes(filterText));
+
+    function sortQuestionsById() {
+        if (questions) {
+            sortById = !sortById;
+            questions = [...questions.sort((a, b) => {
+                return sortById ? a.id - b.id : b.id - a.id;
+            })];
+        }
+    }
+    function sortQuestionsByCategory() {
+        if (questions) {
+            sortByCategory = !sortByCategory;
+            questions = [...questions.sort((a, b) => {
+                if (sortByCategory) {
+                    return a.category.localeCompare(b.category);
+                } else {
+                    return b.category.localeCompare(a.category);
+                }
+            })];
+        }
+    }
+    function sortQuestionsByPoints() {
+        if (questions) {
+            sortByPoints = !sortByPoints;
+            questions = [...questions.sort((a, b) => {
+                return sortByPoints ? a.points - b.points : b.points - a.points;
+            })];
+        }
+    }
+    
+
     onMount(async () => {
         questions = await ExamManager.listQuestions();
 
@@ -26,21 +63,24 @@
         <thead>
           <tr>
             <th>
-                <div><button class="btn btn-outline-info"><p>Номер</p><img src={sortDownIcon} alt="Sort"/></button></div>
+                <div><button on:click={sortQuestionsById} class="btn btn-outline-info"><p>Номер</p>
+                    <img src={sortById ? sortUpIcon : sortDownIcon} alt="Sort"/></button></div>
             </th>
             <th>
                 Текст
-                <input type="text" class="form-control" placeholder="Търсене по текст...">
+                <input bind:value={filterText} type="text" class="form-control" placeholder="Търсене по текст...">
             </th>
-            <th><div><button class="btn btn-outline-info"><p>Категория</p><img src={sortDownIcon} alt="Sort"/></button></div></th>
-            <th><div><button class="btn btn-outline-info"><p>Номер</p><img src={sortDownIcon} alt="Sort"/></button></div></th>
+            <th><div><button on:click={sortQuestionsByCategory} class="btn btn-outline-info"><p>Категория</p>
+                <img src={sortByCategory ? sortUpIcon : sortDownIcon} alt="Sort"/></button></div></th>
+            <th><div><button on:click={sortQuestionsByPoints} class="btn btn-outline-info"><p>Точки</p>
+                <img src={sortByPoints ? sortUpIcon : sortDownIcon} alt="Sort"/></button></div></th>
             <th>Radio</th>
             <th>Снимка</th>
           </tr>
         </thead>
         <tbody>
-            {#if questions}
-                {#each questions as question}
+            {#if filteredQuestions}
+                {#each filteredQuestions as question}
                 <tr>
                     <td>{question.id}</td>
                     <td>{question.question}</td>

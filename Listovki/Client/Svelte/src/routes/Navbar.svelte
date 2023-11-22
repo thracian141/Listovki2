@@ -17,7 +17,7 @@
     });
 </script>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light" style="padding-left: 1rem; padding-right: 1rem;">
+<nav class="navbar navbar-expand-lg navbar-light bg-light" style="padding-left: 1rem; padding-right: 1rem; z-index:999;">
     <a class="navbar-brand" href="/" style="display: flex; flex-direction:row; align-items:center">
         <img src={logo} height="50" class="d-inline-block align-top" alt="">
         <p style="margin:0; font-size:1.8rem">истовки!</p>

@@ -13,10 +13,12 @@ namespace Listovki.Controllers {
     public class ExamController : Controller {
         private ApplicationDbContext _db;
         private IImageService _img;
-        public ExamController(ApplicationDbContext db, IImageService img)
+        private ILogger<ExamController> _logger;
+        public ExamController(ApplicationDbContext db, IImageService img, ILogger<ExamController> logger)
         {
             _db = db;
             _img = img;
+            _logger = logger;
         }
 
 
@@ -54,6 +56,20 @@ namespace Listovki.Controllers {
             var img = await _img.GetImageUrlByQuestionId(questionId);
 
             return File(img, "image/png");
+        }
+        [HttpGet("getExamByCategory")]
+        public async Task<IActionResult> GetExamByCategory(string category) {
+            var questions = await _db.ExamQuestions.Where(q => q.Category == category).ToListAsync();
+            //log info 
+            _logger.LogInformation("got questions!");
+            var random = new Random();
+            questions = questions.OrderBy(q => random.Next()).ToList();
+            _logger.LogInformation("randomized");
+            questions = questions.Take(40).ToList();
+            _logger.LogInformation("took 40");
+
+
+            return new JsonResult(new {questions });
         }
     }
 }

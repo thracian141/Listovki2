@@ -66,7 +66,6 @@ export async function createQuestion(inputModel : QuestionInputModel) {
         },
         body: formData
     });
-    console.log(response);
 
     if (response.ok) {
         goto('/listovki');
@@ -100,6 +99,32 @@ export async function listQuestions() {
         mediaURL: question.mediaURL
     }));
 
-    console.log(questions);
+    return questions;
+}
+
+export async function getExamByCategory(category: string) {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
+    if (!cookie) {
+        return;
+    }
+
+    const token = cookie.split('=')[1];
+    const response = await fetch(`https://localhost:5000/exam/getExamByCategory?category=${category}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    const data = await response.json();
+
+    const questions: Question[] = data.questions.map((question: Question) => ({
+        id: question.id,
+        question: question.question,
+        category: question.category,
+        points: question.points,
+        isMultipleChoice: question.isMultipleChoice,
+        mediaURL: question.mediaURL
+    }));
+
     return questions;
 }

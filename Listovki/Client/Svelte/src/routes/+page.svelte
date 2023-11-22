@@ -239,7 +239,7 @@
         align-items: flex-end;
         width:100%;
         height:70%;
-        background-image: url('src/lib/img/resultsbg.jpg');
+        background-image: url('/resultsbg.jpg');
         background-position-y: 20%;
         background-size: cover;
         background-repeat: none;
