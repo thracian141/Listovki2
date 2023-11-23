@@ -5,6 +5,7 @@ using Listovki.Models.DataModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.IO;
 
 namespace Listovki.Controllers {
@@ -39,11 +40,38 @@ namespace Listovki.Controllers {
                 await _db.ExamQuestions.AddAsync(examQuestion);
                 await _db.SaveChangesAsync();
 
-                return Ok();
+                int id = examQuestion.Id;
+
+                _logger.LogInformation("ID IS: " + id);
+                return Ok(id);
             }
 
             return NotFound("Failed to upload image!");
         }
+        [HttpPost("addAnswer")]
+        public async Task<IActionResult> AddAnswers([FromBody] AnswerInputModel inputModel) {
+            if (inputModel != null) {
+                Answer answer = new Answer {
+                    Id = 0,
+                    Text = inputModel.Text,
+                    IsCorrect = inputModel.IsCorrect,
+                    ExamQuestionId = inputModel.ExamQuestionId,
+                    ExamQuestion = await _db.ExamQuestions.FindAsync(inputModel.ExamQuestionId)
+                };
+                await _db.Answers.AddAsync(answer);
+                await _db.SaveChangesAsync();
+
+                return Ok();
+            }
+            return NotFound();
+        }
+        [HttpGet("listAnswersByQuestionId")]
+        public async Task<IActionResult> ListAnswersByQuestionId(int questionId) {
+            var answers = await _db.Answers.Where(a => a.ExamQuestionId == questionId).ToListAsync();
+
+            return new JsonResult(new { answers });
+        }
+
         [HttpGet("listQuestions")]
         public async Task<IActionResult> ListQuestions() {
             var questions = await _db.ExamQuestions.ToListAsync();

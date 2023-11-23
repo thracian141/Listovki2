@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import Question from './Question.svelte';
+    import ListovkaBody from './ListovkaBody.svelte';
     import { onMount } from 'svelte';
     import { fade, slide, fly } from 'svelte/transition';
     export let data;
@@ -45,7 +45,7 @@
 
     function selectQuestion(index : number) {
         if (questions) {
-            selectedQuestion = questions[index];
+            selectedQuestion = { ...selectedQuestion, ...questions[index] }
         }
         selectedIndex = index;
     }
@@ -86,7 +86,7 @@
     <div in:slide={{delay:5000,duration:200}} class="wrapper" 
     style="border-radius:0; margin:0; margin-left:0.4rem; flex-grow:1; height: 100%;
      padding:0 1rem 0 1rem !important; ">
-        <Question question={selectedQuestion} index={selectedIndex} on:changeQuestion={handleChangeQuestion} />
+        <ListovkaBody question={selectedQuestion} index={selectedIndex} on:changeQuestion={handleChangeQuestion} />
     </div>
 {/if}
 

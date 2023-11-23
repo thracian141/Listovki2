@@ -1,9 +1,11 @@
 <script lang="ts">
     import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-    import type {Question} from '../../../lib/scripts/ExamManager';
+    import type {Question, Answer} from '../../../lib/scripts/ExamManager';
+    import QuestionBody from './QuestionBody.svelte';
     export let question : Question;
     export let index : number;
 
+    let answers: Answer[] | undefined = [];
     let timeleft = 40;
     let timerId: number;
 
@@ -13,14 +15,14 @@
         dispatch('changeQuestion', { direction });
     }
 
-    onMount(() => {
+    onMount(async () => {
         timerId = setInterval(() => {
             if (timeleft > 0) {
                 timeleft--;
             } else {
                 clearInterval(timerId);
             }
-        }, 60000); // 60000 milliseconds = 1 minute
+        }, 600); // 60000 milliseconds = 1 minute
     });
 
     onDestroy(() => {
@@ -32,61 +34,13 @@
 
 <div id="timerwrapper" style="text-shadow:none;" class="text-dark">
     <div id="timerbg" class="text-dark">
-        <div id="timer" style="width: {40-timeleft}%; text-align:end; padding-right:1rem; margin-right:1rem;" class="text-white">{40-timeleft} изминали мин.</div>
-        {timeleft} оставащи мин.
+        <div id="timer" style="width: {((40-timeleft)/40)*100}%; text-align:end; padding-right:1rem; margin-right:1rem;" class="text-white">{40-timeleft} изминали мин.</div>
+        <p style="line-height: 100%; margin:0;">{timeleft} оставащи мин.</p>
         <span class="tooltip">{timeleft} оставащи мин.</span>
     </div>
     <p style="line-height:100%; margin:0; margin-left:1rem;">Общо 40 мин.</p>
 </div>
-<div id="questionwrapper">
-    <div style="width: 100%; height:15%; background-color:white; border-radius:1rem; margin-top:0.5rem; text-shadow:none; color:#000;
-     display:flex; flex-direction:row; justify-content:center; align-items:center; overflow:hidden; position:relative;">
-        <h2 style="margin: 0; line-height:100%;">{question.question}</h2>
-        <h4 style="margin: 0; line-height:100%; position:absolute; left:1%; top:50%; transform:translateY(-50%);">№{index+1}</h4>
-    </div>
-    <div style="width:100%;height:85%; display:flex; justify-content:center; align-items:center;">
-        <div style="display: flex; flex-direction:row;">
-            <img style="max-height:200px" src={question.mediaURL} alt="question media"/>
-            <div class="answers">
-                {#if !question.isMultipleChoice}
-                    <div class="answer">
-                        <input type="radio" id="answer1" name="answer" value="answer1">
-                        <label for="answer1"></label>
-                    </div>
-                    <div class="answer">
-                        <input type="radio" id="answer2" name="answer" value="answer2">
-                        <label for="answer2"></label>
-                    </div>
-                    <div class="answer">
-                        <input type="radio" id="answer3" name="answer" value="answer3">
-                        <label for="answer3"></label>
-                    </div>
-                    <div class="answer">
-                        <input type="radio" id="answer4" name="answer" value="answer4">
-                        <label for="answer4"></label>
-                    </div>
-                {:else}
-                    <div class="answer">
-                        <input type="checkbox" id="answer1" name="answer1" value="answer1">
-                        <label for="answer1"></label>
-                    </div>
-                    <div class="answer">
-                        <input type="checkbox" id="answer2" name="answer2" value="answer2">
-                        <label for="answer2"></label>
-                    </div>
-                    <div class="answer">
-                        <input type="checkbox" id="answer3" name="answer3" value="answer3">
-                        <label for="answer3"></label>
-                    </div>
-                    <div class="answer">
-                        <input type="checkbox" id="answer4" name="answer4" value="answer4">
-                        <label for="answer4"></label>
-                    </div>
-                {/if}
-            </div>
-        </div>
-    </div>
-</div>
+<QuestionBody question={question} index={index}/>
 <div id="buttonswrapper">
     <button on:click={() => changeQuestion('previous')}>
         <img src="/double-chevron.png" style="transform:scaleX(-1);" alt="previous question"/>
@@ -98,13 +52,14 @@
 
 
 <style>
-    #questionwrapper {
+    #timerwrapper {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        overflow: hidden;
         width: 100%;
-        height: 65%;
+        height:15%;
+        background-color: #ffffffee;
+        border-radius: 0 0 1rem 1rem;
+        justify-content: center;
+        align-items: center;
     }
     #buttonswrapper {
         display: flex;
@@ -157,15 +112,6 @@
         padding: 0.3rem;
         border-radius: 999px;
         box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, 0.15);
-    }
-    #timerwrapper {
-        display: flex;
-        width: 100%;
-        height: 15%;
-        background-color: #ffffffee;
-        border-radius: 0 0 1rem 1rem;
-        justify-content: center;
-        align-items: center;
     }
     .tooltip {
         visibility: hidden;

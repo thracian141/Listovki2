@@ -9,6 +9,20 @@ export interface QuestionInputModel {
     ImageFile: File | null;
 }
 
+export interface AnswerInputModel {
+    Id: number;
+    Text: string;
+    IsCorrect: boolean;
+    ExamQuestionId: number;
+}
+
+export interface Answer {
+    id: number;
+    text: string;
+    isCorrect: boolean;
+    examQuestionId: number;
+}
+
 export interface Question {
     id: number;
     question: string;
@@ -67,13 +81,59 @@ export async function createQuestion(inputModel : QuestionInputModel) {
         body: formData
     });
 
-    if (response.ok) {
-        goto('/listovki');
-    } else {
-        alert('Error');
-    }
+    const id = await response.text();
+    console.log(id);
+    return Number(id);
 }
 
+export async function addAnswer(text : string, isCorrect : boolean, questionId : number) {
+    let inputModel : AnswerInputModel = {
+        Id: 0,
+        Text: text,
+        IsCorrect: isCorrect,
+        ExamQuestionId: questionId
+    };
+
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
+    if (!cookie) {
+        console.log('Token not found');
+        return;
+    }
+
+    const token = cookie.split('=')[1];
+
+    const response = await fetch('https://localhost:5000/exam/addAnswer', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(inputModel)
+    });
+}
+
+export async function listAnswersByQuestionId(questionId : number) {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
+    if (!cookie) {
+        return;
+    }
+
+    const token = cookie.split('=')[1];
+    const response = await fetch(`https://localhost:5000/exam/listAnswersByQuestionId?questionId=${questionId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    const data = await response.json();
+    const answers: Answer[] = data.answers.map((answer: Answer) => ({
+        id: answer.id,
+        text: answer.text,
+        isCorrect: answer.isCorrect,
+        examQuestionId: answer.examQuestionId
+    }));
+    return answers;
+} 
 
 export async function listQuestions() {
     const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
