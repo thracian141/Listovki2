@@ -15,6 +15,15 @@
             fetchAnswers();
         }
     }
+    let answersSelected : boolean[] = [false, false, false, false]
+
+    function toggleAnswer(index : number) {
+        if (!question.isMultipleChoice) {
+            answersSelected = answersSelected.map((value, i) => i === index ? !answersSelected[index] : false);
+        } else {
+            answersSelected[index] = !answersSelected[index];
+        }
+    }
 </script>
 
 <div id="questionwrapper">
@@ -27,21 +36,21 @@
     <div style="width:100%;height:100%; display:flex; justify-content:flex-end; align-items:center; flex-direction:column">
         <div class="answers">
             {#if answers}
-                {#if !question.isMultipleChoice}
-                    {#each answers as answer, index}
-                        <button class="answer" id={String(answer.id)} name={String("answer" + index)}>{answer.text}</button>
-                    {/each}
-                {:else}
-                    {#each answers as answer, index}
-                        <button class="answer" id={String(answer.id)} name={String("answer" + index)}>{answer.text}</button>
-                    {/each}
-                {/if}
+                {#each answers as answer, index}
+                    <button class="answer" class:selectedAnswer={answersSelected[index]} on:click={()=>toggleAnswer(index)}
+                        id={String(answer.id)} name={String("answer" + index)}>{answer.text}</button>
+                {/each}
             {/if}
         </div>
     </div>
 </div>
 
 <style>
+    .selectedAnswer {
+        background-color: #0d6efd !important; 
+        color: white !important;
+        border-color: white !important;
+    }
     #mediaoutput {
         position:absolute;
         top:15%;
@@ -60,8 +69,14 @@
         background-color: white;
         border-radius: 1rem;
         border: 0.1rem solid #bfbfbfff;
+        box-shadow: 0 0 1px 1px #bfbfbfff;
         font-size: 1.3rem;
         padding:0.5rem;
+        transition: box-shadow 0.1s ease-in-out;
+    }
+    .answer:hover {
+        background-color: #f1f0f0;
+        box-shadow: 0 0 5px 2px #0d6efd;
     }
     .answers {
         display: flex;

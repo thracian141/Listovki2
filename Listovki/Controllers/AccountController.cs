@@ -44,6 +44,18 @@ namespace Listovki.Controllers {
 
             return new JsonResult(new { user.UserName });
         }
+        [HttpGet("email")]
+        public async Task<IActionResult> Email()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null) {
+                var email = "0";
+                return new JsonResult(new { email });
+            } else {
+                return new JsonResult(new { user.Email });
+            }
+        }
         [HttpGet("isadmin")]
         public async Task<IActionResult> IsAdmin() {
             var user = await _userManager.GetUserAsync(User);

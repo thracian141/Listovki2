@@ -4,6 +4,10 @@
     import { fade, slide, fly } from 'svelte/transition';
     export let data;
     import * as ExamManager from '../../../lib/scripts/ExamManager';
+    import type { QuestionMap, ListovkaInputModel } from '$lib/scripts/ListovkaModel';
+    import type { Answer } from '$lib/scripts/ExamManager';
+    import { listAnswersByQuestionId } from '$lib/scripts/ExamManager';
+    import { getEmail } from '$lib/scripts/UserManager'
 
     let navRender = false;
     let buttonsRender = false;
@@ -41,6 +45,26 @@
             }
         }
         paragraphsRender = true;
+
+        let newExam : ListovkaInputModel = {
+            userId: await getEmail(),
+            questions: []
+        };
+
+        questions?.forEach(async (element) => {
+            let answersTemp : Answer[] | undefined = await listAnswersByQuestionId(element.id);
+            let answersMapTemp = answersTemp?.reduce((acc: { [key: number]: boolean }, answer: Answer) => {
+                acc[answer.id] = false;
+                return acc;
+            }, {} as { [key: number]: boolean }) || {};
+            let questionMap : QuestionMap = {
+                questionId: element.id,
+                answers: answersMapTemp
+            };
+            newExam.questions.push(questionMap);
+        });
+
+        localStorage.setItem('newExam', JSON.stringify(newExam));
     });
 
     function selectQuestion(index : number) {

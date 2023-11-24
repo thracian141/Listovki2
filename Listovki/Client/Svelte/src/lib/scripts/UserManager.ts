@@ -29,6 +29,24 @@ export async function getUsername() {
     const data = await response.json();
     return data.userName;
 }
+export async function getEmail() {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
+    if (!cookie) {
+        return;
+    }
+
+    const token = cookie.split('=')[1];
+    const response = await fetch('https://localhost:5000/account/email', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    const data = await response.json();
+    return data.email;
+}
+
 export async function isAdmin() {
     const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
     if (!cookie) {

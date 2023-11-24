@@ -5,7 +5,6 @@
     export let question : Question;
     export let index : number;
 
-    let answers: Answer[] | undefined = [];
     let timeleft = 40;
     let timerId: number;
 
@@ -14,7 +13,7 @@
     function changeQuestion(direction: string) {
         dispatch('changeQuestion', { direction });
     }
-
+    
     onMount(async () => {
         timerId = setInterval(() => {
             if (timeleft > 0) {
@@ -22,7 +21,7 @@
             } else {
                 clearInterval(timerId);
             }
-        }, 600); // 60000 milliseconds = 1 minute
+        }, 60000); // 60000 milliseconds = 1 minute
     });
 
     onDestroy(() => {
