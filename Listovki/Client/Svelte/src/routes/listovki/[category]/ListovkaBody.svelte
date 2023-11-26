@@ -2,8 +2,10 @@
     import { createEventDispatcher, onDestroy, onMount } from 'svelte';
     import type {Question, Answer} from '../../../lib/scripts/ExamManager';
     import QuestionBody from './QuestionBody.svelte';
+    import type { ListovkaInputModel } from '$lib/scripts/ListovkaModel';
     export let question : Question;
     export let index : number;
+    import {gradeExam} from '$lib/scripts/ExamManager';
 
     let timeleft = 40;
     let timerId: number;
@@ -26,8 +28,30 @@
 
     onDestroy(() => {
         clearInterval(timerId); // Clear the interval when the component is destroyed
+        localStorage.removeItem('newExam');
     });
 
+    function gradeExamAndReturnId() {
+        let exam : ListovkaInputModel = JSON.parse(localStorage.getItem('newExam') || '{}');
+        let allQuestionsAnswered = true;
+        exam.questions.forEach(question => {
+            let questionAnswered = false;
+            for (const answer in question.answers) {
+                if (question.answers[answer]) {
+                    questionAnswered = true;
+                    break;
+                }
+            }
+            if (!questionAnswered) {
+                allQuestionsAnswered = false;
+            }
+        });
+        if (!allQuestionsAnswered) {
+            alert('Моля, отговорете на всички въпроси преди да предадете теста.');
+            return;
+        }
+        let examId = gradeExam(exam);
+    }
 </script>
 
 
@@ -39,6 +63,10 @@
     </div>
     <p style="line-height:100%; margin:0; margin-left:1rem;">Общо 40 мин.</p>
 </div>
+<button id="submitbutton"
+   on:click={gradeExamAndReturnId}>
+    Предай<img src="/arrow-return-right.svg" alt="submit icon"/>
+</button>
 <QuestionBody question={question} index={index}/>
 <div id="buttonswrapper">
     <button on:click={() => changeQuestion('previous')}>
@@ -51,6 +79,41 @@
 
 
 <style>
+    #submitbutton {
+        position: absolute;
+        top: 50%;
+        right: 1rem;
+        transform: translateY(-50%);
+        background-color: #ffffff;
+        height: 10rem;
+        width: 5rem;
+        text-align: center;
+        background-color: #0d6efd;
+        color:white;
+        font-size: large;
+        font-weight: bold;
+        border-radius: 0.5rem;
+        border:none;
+        box-shadow: 1px 1px 3px 2px rgba(0, 0, 0, 0.2);
+        z-index: 999;
+        transition: box-shadow 0.1s ease-in-out, background-color 0.1s ease-in-out, color 0.1s ease-in-out, filter 0.1s ease-in-out;
+    }
+    #submitbutton:hover {
+        cursor: pointer !important;
+        box-shadow: 0px 0px 8px 8px rgba(255,255,255,0.7);
+        background-color: #0d65ea;
+        color: #e3e3e3;
+    }
+    #submitbutton > img {
+        filter:  brightness(0) invert(1);
+        width:70%;
+    }
+    #submitbutton:hover > img {
+        filter:  brightness(0) invert(0.9);
+    }
+    #submitbutton:active{
+        box-shadow: 0px 0px 2px 4px #0d6dfd8e;
+    }
     #timerwrapper {
         display: flex;
         width: 100%;

@@ -51,7 +51,7 @@
             questions: []
         };
 
-        questions?.forEach(async (element) => {
+        newExam.questions = await Promise.all(questions?.map(async (element) => {
             let answersTemp : Answer[] | undefined = await listAnswersByQuestionId(element.id);
             let answersMapTemp = answersTemp?.reduce((acc: { [key: number]: boolean }, answer: Answer) => {
                 acc[answer.id] = false;
@@ -61,9 +61,9 @@
                 questionId: element.id,
                 answers: answersMapTemp
             };
-            newExam.questions.push(questionMap);
-        });
-
+            return questionMap;
+        }) || []);
+        console.log(newExam);
         localStorage.setItem('newExam', JSON.stringify(newExam));
     });
 

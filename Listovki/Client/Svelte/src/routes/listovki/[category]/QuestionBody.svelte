@@ -1,27 +1,49 @@
 <script lang="ts">
+    import { browser } from "$app/environment";
     import type { Answer, Question } from "$lib/scripts/ExamManager";
     import { listAnswersByQuestionId } from "$lib/scripts/ExamManager";
+    import type { QuestionMap, ListovkaInputModel } from "$lib/scripts/ListovkaModel";
 
     export let question : Question;
     export let index : number;
     let answers : Answer[] | undefined = [];
+    let answersSelected : boolean[] = [false, false, false, false];
+    let newExam : ListovkaInputModel;
 
     const fetchAnswers = async () => {
         answers = await listAnswersByQuestionId(question.id);
+
+        newExam = JSON.parse(localStorage.getItem('newExam') || '{}');
+        if (newExam && newExam.questions) {
+            const questionMap : QuestionMap | undefined = newExam.questions.find((q: QuestionMap) => q.questionId === question.id);
+            if (questionMap && answers) {
+                answersSelected = answers.map(answer => questionMap.answers[answer.id] || false);
+            }
+        }
     };
 
     $: {
-        if (question){
+        if (question) {
             fetchAnswers();
+            newExam = JSON.parse(localStorage.getItem('newExam') || '{}');
         }
     }
-    let answersSelected : boolean[] = [false, false, false, false]
 
     function toggleAnswer(index : number) {
         if (!question.isMultipleChoice) {
             answersSelected = answersSelected.map((value, i) => i === index ? !answersSelected[index] : false);
         } else {
             answersSelected[index] = !answersSelected[index];
+        }
+        if (question && answers) {
+            const questionMap = newExam.questions.find((q: QuestionMap) => q.questionId === question.id);
+            if (questionMap) {
+                questionMap.answers = answers.reduce((acc, answer, index) => {
+                    acc[answer.id] = answersSelected[index];
+                    return acc;
+                }, {} as { [key: number]: boolean });
+                localStorage.setItem('newExam', JSON.stringify(newExam));
+            }
         }
     }
 </script>

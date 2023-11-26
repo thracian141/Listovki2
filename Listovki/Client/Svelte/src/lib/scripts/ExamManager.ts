@@ -1,4 +1,5 @@
 import { goto } from "$app/navigation";
+import type { ListovkaInputModel } from "./ListovkaModel";
 
 export interface QuestionInputModel {
     Id: number;
@@ -187,4 +188,24 @@ export async function getExamByCategory(category: string) {
     }));
 
     return questions;
+}
+
+export async function gradeExam(exam : ListovkaInputModel) {
+    console.log(exam);
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
+    if (!cookie) {
+        return;
+    }
+    const token = cookie.split('=')[1];
+    const response = await fetch('https://localhost:5000/exam/gradeExam', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(exam.questions)
+    });
+    const data = await response.text();
+
+    return Number(data);
 }

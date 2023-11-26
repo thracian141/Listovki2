@@ -166,6 +166,34 @@ namespace Listovki.Data.Migrations
                     b.ToTable("ExamQuestions");
                 });
 
+            modelBuilder.Entity("Listovki.Models.ListovkaResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GuessedQuestionsNumber")
+                        .HasColumnType("int");
+
+                    b.Property<double>("PercentageRight")
+                        .HasColumnType("float");
+
+                    b.Property<int>("QuestionsNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserEmail");
+
+                    b.ToTable("ListovkaResults");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -312,6 +340,17 @@ namespace Listovki.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ExamQuestion");
+                });
+
+            modelBuilder.Entity("Listovki.Models.ListovkaResult", b =>
+                {
+                    b.HasOne("Listovki.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserEmail")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

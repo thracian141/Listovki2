@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Listovki.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class _001 : Migration
+    public partial class ListovkaRezultatiAddedAsModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,7 +34,7 @@ namespace Listovki.Data.Migrations
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EGN = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProfilePictureURL = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProfilePictureURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PassedExams = table.Column<int>(type: "int", nullable: false),
                     FailedExams = table.Column<int>(type: "int", nullable: false),
                     IsAdmin = table.Column<bool>(type: "bit", nullable: false),
@@ -64,6 +64,7 @@ namespace Listovki.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Question = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Points = table.Column<int>(type: "int", nullable: false),
                     IsMultipleChoice = table.Column<bool>(type: "bit", nullable: false),
                     MediaURL = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -180,6 +181,28 @@ namespace Listovki.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ListovkaResults",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PercentageRight = table.Column<double>(type: "float", nullable: false),
+                    QuestionsNumber = table.Column<int>(type: "int", nullable: false),
+                    GuessedQuestionsNumber = table.Column<int>(type: "int", nullable: false),
+                    UserEmail = table.Column<string>(type: "nvarchar(256)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ListovkaResults", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ListovkaResults_AspNetUsers_UserEmail",
+                        column: x => x.UserEmail,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Email",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Answers",
                 columns: table => new
                 {
@@ -243,6 +266,11 @@ namespace Listovki.Data.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ListovkaResults_UserEmail",
+                table: "ListovkaResults",
+                column: "UserEmail");
         }
 
         /// <inheritdoc />
@@ -265,6 +293,9 @@ namespace Listovki.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "ListovkaResults");
 
             migrationBuilder.DropTable(
                 name: "ExamQuestions");

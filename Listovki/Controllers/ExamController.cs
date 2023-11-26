@@ -2,6 +2,7 @@
 using Listovki.Data;
 using Listovki.Models;
 using Listovki.Models.DataModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +16,14 @@ namespace Listovki.Controllers {
         private ApplicationDbContext _db;
         private IImageService _img;
         private ILogger<ExamController> _logger;
-        public ExamController(ApplicationDbContext db, IImageService img, ILogger<ExamController> logger)
+        private UserManager<AppUser> _userManager;
+        public ExamController(ApplicationDbContext db, IImageService img,
+            ILogger<ExamController> logger, UserManager<AppUser> userManager)
         {
             _db = db;
             _img = img;
             _logger = logger;
+            _userManager = userManager;
         }
 
 
@@ -98,6 +102,58 @@ namespace Listovki.Controllers {
 
 
             return new JsonResult(new {questions });
+        }
+        [HttpPost("gradeExam")]
+        public async Task<IActionResult> GradeExam([FromBody] List<QuestionMap> exam) {
+            var user = await _userManager.GetUserAsync(User);
+            ListovkaResult result = new ListovkaResult {
+                Id = 0,
+                PercentageRight = 0,
+                QuestionsNumber = 0,
+                GuessedQuestionsNumber = 0,
+                UserEmail = user.Email,
+                User = user
+            };
+            double pointsTotal = 0;
+            double pointsGuessed = 0;
+            int questionsGuessedCount = 0;
+
+            foreach (var question in exam) {
+                var itsQuestion = await _db.ExamQuestions.FindAsync(question.questionId);
+                var itsAnswers = await _db.Answers.Where(a => a.ExamQuestionId == question.questionId).ToListAsync();
+
+                bool guessedRight = true;
+                if (itsQuestion.IsMultipleChoice) {
+                    foreach (var answer in itsAnswers) {
+                        if (question.answers[answer.Id] != answer.IsCorrect) {
+                            guessedRight = false;
+                        }
+                    }
+                } else {
+                    foreach (var answer in itsAnswers) {
+                        var correctAnswer = itsAnswers.Where(a => a.IsCorrect == true).FirstOrDefault();
+                        if (question.answers[answer.Id] != answer.IsCorrect) {
+                            guessedRight = false;
+                        }
+                    }
+                }
+                if (guessedRight) {
+                    pointsGuessed += itsQuestion.Points;
+                    questionsGuessedCount++;
+                }
+                pointsTotal += itsQuestion.Points;
+            }
+
+            double grade = (pointsGuessed / pointsTotal) * 100;
+
+            result.PercentageRight = grade;
+            result.QuestionsNumber = exam.Count;
+            result.GuessedQuestionsNumber = questionsGuessedCount;
+
+            await _db.ListovkaResults.AddAsync(result);
+            await _db.SaveChangesAsync();
+
+            return Ok(result.Id);
         }
     }
 }

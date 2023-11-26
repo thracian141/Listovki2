@@ -20,5 +20,6 @@ namespace Listovki.Data {
         public DbSet<Answer> Answers { get; set; }
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<ExamQuestion> ExamQuestions { get; set; }
+        public DbSet<ListovkaResult> ListovkaResults { get; set; }
     }
 }
