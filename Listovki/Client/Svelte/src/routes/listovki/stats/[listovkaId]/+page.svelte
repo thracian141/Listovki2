@@ -1,25 +1,20 @@
 <script lang="ts">
+    import type {ListovkaResultModel} from "$lib/scripts/ListovkaModel";
     import { results } from "$lib/scripts/ExamManager";
     import { onMount } from "svelte";
-    import type {ListovkaResultModel} from "$lib/scripts/ListovkaModel";
-    export const listovkaId : number = 1;
 
-    let listovka : ListovkaResultModel = {
-        id: 0,
-        percentageRight: 0,
-        guessedQuestionsNumber: 0,
-        questionsNumber: 0,
-        userEmail: "",
-        user: ""
-    };
+    export let data;
+    let listovka : ListovkaResultModel;
+
     onMount(async () => {
-        const data : ListovkaResultModel | undefined = await results(listovkaId);
-        if (data) {
-            listovka = data;
+        const result : ListovkaResultModel | undefined = await results(parseInt(data.test));
+        if (result) {
+            listovka = result;
         } else {
             console.log('Data is undefined');
         }
     });
+
 </script>
 
 <div class="wrapper" style="height:90%; width:40%; padding:0; overflow:hidden; text-shadow:none">
@@ -27,32 +22,33 @@
         <h1>Резултати:</h1>
     </div>
     <div class="wrappersmall">
-        <div class="wraprow">
-            <h3>Листовка | № {listovka.id}</h3>
-            <p>Запомни номера, за намиране на листовката по-късно!</p>
-        </div>
-        <div class="wraprow">
-            <p>Брой решени въпроси: {listovka.questionsNumber}</p>
-        </div>
-        <div class="wraprow">
-            <p>Правилни отговори: {listovka.guessedQuestionsNumber}</p>
-        </div>
-        <div class="wraprow">
-            <h5>Равнява се на процент: {listovka.percentageRight}%</h5>
-        </div>
-        <div class="wraprow">
-            <p>на потребител: {listovka.userEmail}</p>
-        </div>
-        <div class="resultrow">
-            <h2>Оценка:
-            </h2>
-            {#if listovka.percentageRight >= 89}
-                <h2 style="color:green">Положителна</h2>
-            {:else}
-                <h2 style="color:red;">Отрицателна</h2>
-            {/if}
-
-        </div>
+        {#if listovka}
+            <div class="wraprow">
+                <h3>Листовка | № {listovka.id}</h3>
+                <p>Запомни номера, за намиране на листовката по-късно!</p>
+            </div>
+            <div class="wraprow">
+                <p>Брой решени въпроси: {listovka.questionsNumber}</p>
+            </div>
+            <div class="wraprow">
+                <p>Правилни отговори: {listovka.guessedQuestionsNumber}</p>
+            </div>
+            <div class="wraprow">
+                <h5>Равнява се на процент: {listovka.percentageRight.toFixed(2)}%</h5>
+            </div>
+            <div class="wraprow">
+                <p>на потребител: {listovka.userEmail}</p>
+            </div>
+            <div class="resultrow">
+                <h2>Оценка:
+                </h2>
+                {#if listovka.percentageRight >= 89}
+                    <h2 style="color:white; background-color:green; padding:0.4rem; border-radius:0.5rem;">Положителна</h2>
+                {:else}
+                    <h2 style="color:white; background-color:red; padding:0.4rem; border-radius:0.5rem;">Отрицателна</h2>
+                {/if}
+            </div>
+        {/if}
     </div>
 </div>
 

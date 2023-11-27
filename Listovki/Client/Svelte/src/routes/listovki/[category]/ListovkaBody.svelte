@@ -6,6 +6,7 @@
     export let question : Question;
     export let index : number;
     import {gradeExam} from '$lib/scripts/ExamManager';
+    import { goto } from '$app/navigation';
 
     let timeleft = 40;
     let timerId: number;
@@ -31,7 +32,7 @@
         localStorage.removeItem('newExam');
     });
 
-    function gradeExamAndReturnId() {
+    async function gradeExamAndReturnId() {
         let exam : ListovkaInputModel = JSON.parse(localStorage.getItem('newExam') || '{}');
         let allQuestionsAnswered = true;
         exam.questions.forEach(question => {
@@ -50,7 +51,9 @@
             alert('Моля, отговорете на всички въпроси преди да предадете теста.');
             return;
         }
-        let examId = gradeExam(exam);
+        let listovkaId = await gradeExam(exam);
+        console.log(listovkaId);
+        goto(`/listovki/stats/${listovkaId}`);
     }
 </script>
 

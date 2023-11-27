@@ -115,6 +115,7 @@
                 break;
         }
     }
+    let listovkaIdForCheck : number = 0;
 </script>
 
 <div class="wrapper" style="margin-top: 1rem; width:80%">
@@ -174,8 +175,8 @@
                 <div style="width: fit-content !important; display:flex; border-radius:1rem; outline: #6c757d55 solid 1px; padding:2px;">
                     <div style="display: flex; flex-direction:row; position:relative; 
                        width:24rem; background-color:#28a74555; border-radius:1rem; padding:0.5rem;">
-                        <input placeholder="Номер на листовка" id="input-code" type="number"/>
-                        <button class="btn btn-primary" id="input-code-button">Въведи</button>
+                        <input bind:value={listovkaIdForCheck} placeholder="Номер на листовка" id="input-code" type="number"/>
+                        <a href="/listovki/stats/{listovkaIdForCheck}" class="btn btn-primary" id="input-code-button">Въведи</a>
                     </div>
                 </div>
             </div>
