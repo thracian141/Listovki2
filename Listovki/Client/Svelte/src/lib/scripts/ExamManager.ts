@@ -1,5 +1,5 @@
 import { goto } from "$app/navigation";
-import type { ListovkaInputModel } from "./ListovkaModel";
+import type { ListovkaInputModel, ListovkaResultModel } from "./ListovkaModel";
 
 export interface QuestionInputModel {
     Id: number;
@@ -208,4 +208,23 @@ export async function gradeExam(exam : ListovkaInputModel) {
     const data = await response.text();
 
     return Number(data);
+}
+
+export async function results(listovkaId : number) {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
+    if (!cookie) {
+        return;
+    }
+    const token = cookie.split('=')[1];
+    const response = await fetch(`https://localhost:5000/exam/results?listovkaId=${listovkaId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        }
+    });
+    const data = await response.json();
+    const listovka : ListovkaResultModel = data.listovka;
+    console.log(data);
+    console.log(listovka);
+    return listovka;
 }

@@ -155,5 +155,18 @@ namespace Listovki.Controllers {
 
             return Ok(result.Id);
         }
+
+        [HttpGet("results")]
+        public async Task<IActionResult> Results(int listovkaId)
+        {
+            var listovka = await _db.ListovkaResults.FindAsync(listovkaId);
+
+            if (listovka == null)
+            {
+                return NotFound("Listovka not found!");
+            }
+
+            return new JsonResult(new { listovka });
+        }
     }
 }
