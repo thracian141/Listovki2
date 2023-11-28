@@ -9,6 +9,7 @@
     import { listAnswersByQuestionId } from '$lib/scripts/ExamManager';
     import { getEmail } from '$lib/scripts/UserManager'
 
+    let examSubmitted : boolean = false;
     let navRender = false;
     let buttonsRender = false;
     let paragraphsRender = false;
@@ -82,18 +83,55 @@
         }
         selectQuestion(selectedIndex);
     }
+
+    async function checkIfAnswerIsWrong(index : number) {
+        if (questions?.[index]) {
+            let questionMap : ListovkaInputModel = {
+                userId: '',
+                questions: JSON.parse(localStorage.getItem('newExam') || '{}')
+            };
+            if (questionMap.questions) {
+                let questionMapFromIndex = questionMap.questions.find((q: QuestionMap) => q.questionId === questions?.[index].id);
+                if (questionMapFromIndex) {
+                    let selectionAnswers = Object.values(questionMapFromIndex.answers);
+                    let questionAnswers = await listAnswersByQuestionId(questions?.[index].id);
+                    if (questionAnswers) {
+                        let correctAnswers = questionAnswers.filter(answer => answer.isCorrect);
+                        if (selectionAnswers.length === correctAnswers.length) {
+                            for (let i = 0; i < selectionAnswers.length; i++) {
+                                if (selectionAnswers[i] !== correctAnswers[i].isCorrect) {
+                                    return true;
+                                }
+                            }
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
 </script>
 
 {#if navRender}
     <div class="questionNav" in:fade={{delay:1300,duration:500}}>
         {#each count as x, index}
             {#if questions && questions[index]}
-                <button on:click={() => selectQuestion(index)} class="bg-white questionEl" in:slide={{delay:(2000+50*index) , duration: 100}} style="background-color:#f5e0e0"> 
-                    {#if paragraphsRender}
+                {#if !examSubmitted}
+                    <button on:click={() => selectQuestion(index)} class="bg-white questionEl" in:slide={{delay:(2000+50*index) , duration: 100}} style="background-color:#f5e0e0"> 
+                        {#if paragraphsRender}
+                            <p style="margin: none;" in:fly={{delay:(3200+10*index+50*index), duration:200}}>{index+1}</p>
+                            <img src={questions[index].mediaURL} in:fly={{delay:(3200+10*index+50*index), duration:200}} alt="">
+                        {/if}
+                    </button>
+                {:else if await checkIfAnswerIsWrong(index) && examSubmitted}
+                    <button on:click={() => selectQuestion(index)} class="bg-white questionEl" in:slide={{delay:(2000+50*index) , duration: 100}} style="background-color:#ff8787"> 
                         <p style="margin: none;" in:fly={{delay:(3200+10*index+50*index), duration:200}}>{index+1}</p>
                         <img src={questions[index].mediaURL} in:fly={{delay:(3200+10*index+50*index), duration:200}} alt="">
-                    {/if}
-                </button>
+                    </button>
+                {/if}
             {:else}
                 {#if buttonsRender}
                     <button type="button" class="bg-white questionEl" in:slide={{delay:(2000+50*index) , duration: 100}} style="background-color:#f5e0e0"> 
@@ -110,7 +148,7 @@
     <div in:slide={{delay:5000,duration:200}} class="wrapper" 
     style="border-radius:0; margin:0; margin-left:0.4rem; flex-grow:1; height: 100%;
      padding:0 1rem 0 1rem !important; ">
-        <ListovkaBody question={selectedQuestion} index={selectedIndex} on:changeQuestion={handleChangeQuestion} />
+        <ListovkaBody question={selectedQuestion} index={selectedIndex} examSubmitted={examSubmitted} on:changeQuestion={handleChangeQuestion} />
     </div>
 {/if}
 

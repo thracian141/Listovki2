@@ -3,22 +3,28 @@
     import type { Answer, Question } from "$lib/scripts/ExamManager";
     import { listAnswersByQuestionId } from "$lib/scripts/ExamManager";
     import type { QuestionMap, ListovkaInputModel } from "$lib/scripts/ListovkaModel";
-
+    export let examSubmitted: boolean;
     export let question : Question;
     export let index : number;
     let answers : Answer[] | undefined = [];
     let answersSelected : boolean[] = [false, false, false, false];
     let newExam : ListovkaInputModel;
+    let isLoading = true;
 
     const fetchAnswers = async () => {
-        answers = await listAnswersByQuestionId(question.id);
+        isLoading = true;
+        try {
+            answers = await listAnswersByQuestionId(question.id);
 
-        newExam = JSON.parse(localStorage.getItem('newExam') || '{}');
-        if (newExam && newExam.questions) {
-            const questionMap : QuestionMap | undefined = newExam.questions.find((q: QuestionMap) => q.questionId === question.id);
-            if (questionMap && answers) {
-                answersSelected = answers.map(answer => questionMap.answers[answer.id] || false);
+            newExam = JSON.parse(localStorage.getItem('newExam') || '{}');
+            if (newExam && newExam.questions) {
+                const questionMap : QuestionMap | undefined = newExam.questions.find((q: QuestionMap) => q.questionId === question.id);
+                if (questionMap && answers) {
+                    answersSelected = answers.map(answer => questionMap.answers[answer.id] || false);
+                }
             }
+        } finally {
+            isLoading = false;
         }
     };
 
@@ -30,6 +36,7 @@
     }
 
     function toggleAnswer(index : number) {
+        if (isLoading) return;
         if (!question.isMultipleChoice) {
             answersSelected = answersSelected.map((value, i) => i === index ? !answersSelected[index] : false);
         } else {
@@ -59,8 +66,11 @@
         <div class="answers">
             {#if answers}
                 {#each answers as answer, index}
-                    <button class="answer" class:selectedAnswer={answersSelected[index]} on:click={()=>toggleAnswer(index)}
-                        id={String(answer.id)} name={String("answer" + index)}>{answer.text}</button>
+                    <button class="answer" class:correctAnswer={examSubmitted && answersSelected[index] && answer.isCorrect} 
+                    class:wrongAnswer={examSubmitted && answersSelected[index] && !answer.isCorrect}
+                     class:selectedAnswer={answersSelected[index] && !examSubmitted}
+                    on:click={()=>toggleAnswer(index)}
+                        id={String(answer.id)} name={String("answer" + index)} disabled={isLoading || examSubmitted}>{answer.text}</button>
                 {/each}
             {/if}
         </div>
@@ -68,6 +78,16 @@
 </div>
 
 <style>
+    .wrongAnswer {
+        background-color: #dc3545 !important; 
+        color: white !important;
+        border-color: white !important;
+    }
+    .correctAnswer {
+        background-color: #198754 !important; 
+        color: white !important;
+        border-color: white !important;
+    }
     .selectedAnswer {
         background-color: #0d6efd !important; 
         color: white !important;

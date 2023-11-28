@@ -5,6 +5,7 @@
     import type { ListovkaInputModel } from '$lib/scripts/ListovkaModel';
     export let question : Question;
     export let index : number;
+    export let examSubmitted : boolean;
     import {gradeExam} from '$lib/scripts/ExamManager';
     import { goto } from '$app/navigation';
 
@@ -33,27 +34,36 @@
     });
 
     async function gradeExamAndReturnId() {
-        let exam : ListovkaInputModel = JSON.parse(localStorage.getItem('newExam') || '{}');
-        let allQuestionsAnswered = true;
-        exam.questions.forEach(question => {
-            let questionAnswered = false;
-            for (const answer in question.answers) {
-                if (question.answers[answer]) {
-                    questionAnswered = true;
-                    break;
+        if (!examSubmitted) {
+            examSubmitted = true;
+            //set submitbutton's text to "Оценка"
+            let submitbutton = document.getElementById('submitbutton');
+            if (submitbutton) {
+                submitbutton.innerHTML = 'Оценка';
+            }
+        } else {
+            let exam : ListovkaInputModel = JSON.parse(localStorage.getItem('newExam') || '{}');
+            let allQuestionsAnswered = true;
+            exam.questions.forEach(question => {
+                let questionAnswered = false;
+                for (const answer in question.answers) {
+                    if (question.answers[answer]) {
+                        questionAnswered = true;
+                        break;
+                    }
                 }
+                if (!questionAnswered) {
+                    allQuestionsAnswered = false;
+                }
+            });
+            if (!allQuestionsAnswered) {
+                alert('Моля, отговорете на всички въпроси преди да предадете теста.');
+                return;
             }
-            if (!questionAnswered) {
-                allQuestionsAnswered = false;
-            }
-        });
-        if (!allQuestionsAnswered) {
-            alert('Моля, отговорете на всички въпроси преди да предадете теста.');
-            return;
+            let listovkaId = await gradeExam(exam);
+            console.log(listovkaId);
+            goto(`/listovki/stats/${listovkaId}`);
         }
-        let listovkaId = await gradeExam(exam);
-        console.log(listovkaId);
-        goto(`/listovki/stats/${listovkaId}`);
     }
 </script>
 
@@ -70,7 +80,7 @@
    on:click={gradeExamAndReturnId}>
     Предай<img src="/arrow-return-right.svg" alt="submit icon"/>
 </button>
-<QuestionBody question={question} index={index}/>
+<QuestionBody question={question} index={index} examSubmitted={examSubmitted}/>
 <div id="buttonswrapper">
     <button on:click={() => changeQuestion('previous')}>
         <img src="/double-chevron.png" style="transform:scaleX(-1);" alt="previous question"/>

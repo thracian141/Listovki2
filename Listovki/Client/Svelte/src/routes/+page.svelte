@@ -115,7 +115,7 @@
                 break;
         }
     }
-    let listovkaIdForCheck : number = 0;
+    let listovkaIdForCheck : number | undefined;
 </script>
 
 <div class="wrapper" style="margin-top: 1rem; width:80%">
