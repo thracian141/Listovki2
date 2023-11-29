@@ -3,6 +3,7 @@
     import type { Answer, Question } from "$lib/scripts/ExamManager";
     import { listAnswersByQuestionId } from "$lib/scripts/ExamManager";
     import type { QuestionMap, ListovkaInputModel } from "$lib/scripts/ListovkaModel";
+    import { onMount } from "svelte";
     export let examSubmitted: boolean;
     export let question : Question;
     export let index : number;
@@ -10,12 +11,18 @@
     let answersSelected : boolean[] = [false, false, false, false];
     let newExam : ListovkaInputModel;
     let isLoading = true;
+    let questionMap : QuestionMap | undefined;
 
-    const fetchAnswers = async () => {
+    onMount(async () => {
+        newExam = JSON.parse(localStorage.getItem('newExam') || '{}');
+        questionMap = newExam.questions.find((q: QuestionMap) => q.questionId === question.id);
+        await fetchAnswers();
+    })
+
+    async function fetchAnswers() {
         isLoading = true;
         try {
             answers = await listAnswersByQuestionId(question.id);
-
             newExam = JSON.parse(localStorage.getItem('newExam') || '{}');
             if (newExam && newExam.questions) {
                 const questionMap : QuestionMap | undefined = newExam.questions.find((q: QuestionMap) => q.questionId === question.id);
@@ -27,23 +34,22 @@
             isLoading = false;
         }
     };
-
     $: {
         if (question) {
             fetchAnswers();
-            newExam = JSON.parse(localStorage.getItem('newExam') || '{}');
         }
     }
 
     function toggleAnswer(index : number) {
         if (isLoading) return;
+        if (!question || !answers) return;
         if (!question.isMultipleChoice) {
             answersSelected = answersSelected.map((value, i) => i === index ? !answersSelected[index] : false);
         } else {
             answersSelected[index] = !answersSelected[index];
         }
-        if (question && answers) {
-            const questionMap = newExam.questions.find((q: QuestionMap) => q.questionId === question.id);
+        if (!isLoading) {
+            questionMap = newExam.questions.find((q: QuestionMap) => q.questionId === question.id);
             if (questionMap) {
                 questionMap.answers = answers.reduce((acc, answer, index) => {
                     acc[answer.id] = answersSelected[index];

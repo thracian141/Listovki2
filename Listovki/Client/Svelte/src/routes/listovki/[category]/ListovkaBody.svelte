@@ -8,6 +8,7 @@
     export let examSubmitted : boolean;
     import {gradeExam} from '$lib/scripts/ExamManager';
     import { goto } from '$app/navigation';
+    let isLoading = true;
 
     let timeleft = 40;
     let timerId: number;
@@ -16,6 +17,11 @@
 
     function changeQuestion(direction: string) {
         dispatch('changeQuestion', { direction });
+    }
+
+    function submitExam() {
+        examSubmitted = true;
+        dispatch('examSubmitted', { examSubmitted });
     }
     
     onMount(async () => {
@@ -26,6 +32,7 @@
                 clearInterval(timerId);
             }
         }, 60000); // 60000 milliseconds = 1 minute
+        isLoading = false;
     });
 
     onDestroy(() => {
@@ -61,7 +68,6 @@
                 return;
             }
             let listovkaId = await gradeExam(exam);
-            console.log(listovkaId);
             goto(`/listovki/stats/${listovkaId}`);
         }
     }
@@ -77,10 +83,12 @@
     <p style="line-height:100%; margin:0; margin-left:1rem;">Общо 40 мин.</p>
 </div>
 <button id="submitbutton"
-   on:click={gradeExamAndReturnId}>
+   on:click={async ()=> {await gradeExamAndReturnId(); submitExam()}}>
     Предай<img src="/arrow-return-right.svg" alt="submit icon"/>
 </button>
-<QuestionBody question={question} index={index} examSubmitted={examSubmitted}/>
+{#if !isLoading}
+<QuestionBody question={question} index={index} examSubmitted={examSubmitted} on:examSubmitted="{e => dispatch('examSubmitted', e.detail)}"/>
+{/if}
 <div id="buttonswrapper">
     <button on:click={() => changeQuestion('previous')}>
         <img src="/double-chevron.png" style="transform:scaleX(-1);" alt="previous question"/>
