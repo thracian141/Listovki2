@@ -49,7 +49,7 @@
             {:else}
                 {#await usernamePromise then username}
                     <li class="nav-item">
-                        <a class="nav-link" href="/account">Здравей, {username}!</a>
+                        <a class="nav-link" href="/listovki/stats">Здравей, {username}!</a>
                     </li>
                 {/await}
                 <li class="nav-item">

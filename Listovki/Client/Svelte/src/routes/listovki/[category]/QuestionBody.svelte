@@ -12,6 +12,7 @@
     let newExam : ListovkaInputModel;
     let isLoading = true;
     let questionMap : QuestionMap | undefined;
+    let correctAnswersCount = 0;
 
     onMount(async () => {
         newExam = JSON.parse(localStorage.getItem('newExam') || '{}');
@@ -32,6 +33,7 @@
             }
         } finally {
             isLoading = false;
+            correctAnswersCount = answers?.filter(answer => answer.isCorrect).length || 0;
         }
     };
     $: {
@@ -66,6 +68,10 @@
      display:flex; flex-direction:row; justify-content:center; align-items:center; overflow:hidden; position:relative;">
         <h2 style="margin: 0; line-height:100%;">{question.question}</h2>
         <h4 style="margin: 0; line-height:100%; position:absolute; left:1%; top:50%; transform:translateY(-50%);">№{index+1}</h4>
+        <div style="height: 100%; display:flex; flex-direction:row; justify-content:center;align-items:center; gap:2rem; position:absolute; right:1%; top:50%; transform:translateY(-50%)">
+            <h5 style="margin: 0; line-height:100%;">Точки: {question.points}</h5>
+            <h5 style="margin: 0; line-height:100%;">Верни: {correctAnswersCount}</h5>
+        </div>
     </div>
     <div id="mediaoutput" style="background-image:url({question.mediaURL});"></div>
     <div style="width:100%;height:100%; display:flex; justify-content:flex-end; align-items:center; flex-direction:column">

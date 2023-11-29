@@ -8,12 +8,18 @@
     export let examSubmitted : boolean;
     import {gradeExam} from '$lib/scripts/ExamManager';
     import { goto } from '$app/navigation';
+    import { browser } from '$app/environment';
     let isLoading = true;
-
+    let audio : HTMLAudioElement | null = null;
     let timeleft = 40;
     let timerId: number;
 
     const dispatch = createEventDispatcher();
+    if (browser) {
+        audio = new Audio('../src/lib/sound/yoda.mp3');
+        audio.load();
+        audio.volume = 0.5;
+    }
 
     function changeQuestion(direction: string) {
         dispatch('changeQuestion', { direction });
@@ -41,6 +47,9 @@
     });
 
     async function gradeExamAndReturnId() {
+        if (browser) {
+            playSound();
+        }
         if (!examSubmitted) {
             examSubmitted = true;
             //set submitbutton's text to "Оценка"
@@ -71,6 +80,12 @@
             goto(`/listovki/stats/${listovkaId}`);
         }
     }
+
+    function playSound() {
+        if (browser && audio) {
+            audio.play();
+        }
+    }
 </script>
 
 
@@ -83,7 +98,7 @@
     <p style="line-height:100%; margin:0; margin-left:1rem;">Общо 40 мин.</p>
 </div>
 <button id="submitbutton"
-   on:click={async ()=> {await gradeExamAndReturnId(); submitExam()}}>
+   on:click={async ()=> {await gradeExamAndReturnId(); submitExam();}}>
     Предай<img src="/arrow-return-right.svg" alt="submit icon"/>
 </button>
 {#if !isLoading}
