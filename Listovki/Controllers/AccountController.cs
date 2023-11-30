@@ -17,8 +17,8 @@ namespace Listovki.Controllers {
         }
 
         [HttpGet("info")]
-        public async Task<IActionResult> Info(string email) {
-            var user = await _userManager.FindByEmailAsync(email);
+        public async Task<IActionResult> Info() {
+            var user = await _userManager.GetUserAsync(User);
 
             var userinfo = new {
                 user.FullName,

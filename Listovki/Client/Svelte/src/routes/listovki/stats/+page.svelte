@@ -47,15 +47,15 @@
     <div class="smallwrapper" style="width:100%; height:30%; margin-bottom:1rem;">
         <h1><span style="font-size:4rem;text-decoration: underline; text-decoration-style:dashed;">{listovkiCount}</span> решени листовки</h1>
         <div class="bar" style="background-color: #dc3545;">
-            <div class="bar-fill" style="background-color: #28a745; width:{verniListovki*100}%"></div>
-            <p style="margin: 0; line-height:1.5rem; position:absolute; left:2%; top:50%; transform:translateY(-50%);">{verniListovki*100}% верни</p>
-            <p style="margin: 0; line-height:1.5rem; position:absolute; right:2%; top:50%; transform:translateY(-50%);">{100-(verniListovki*100)}% грешни</p>
+            <div class="bar-fill" style="background-color: #28a745; width:{(verniListovki/listovkiCount)*100}%"></div>
+            <p style="margin: 0; line-height:1.5rem; position:absolute; left:2%; top:50%; transform:translateY(-50%);">{((verniListovki/listovkiCount)*100).toFixed(1)}% верни {String("(" + verniListovki + " верни)")}</p>
+            <p style="margin: 0; line-height:1.5rem; position:absolute; right:2%; top:50%; transform:translateY(-50%);">{(100-((verniListovki/listovkiCount)*100)).toFixed(1)}% грешни {String("(" + (listovkiCount-verniListovki) + " грешни)")}</p>
         </div>
         <div class="bar" style="background-color: #ffffff;">
-            <div class="bar-fill" style="background-color: #dc3545; width:{(aCatListovki/listovkiCount)*100}%">A кат. - {(aCatListovki/listovkiCount)*100}%</div>
-            <div class="bar-fill" style="background-color: #6f42c1; width:{(bCatListovki/listovkiCount)*100}%">B кат. - {(bCatListovki/listovkiCount)*100}%</div>
-            <div class="bar-fill" style="background-color: #17a2b8; width:{(cCatListovki/listovkiCount)*100}%">C кат. - {(cCatListovki/listovkiCount)*100}%</div>
-            <div class="bar-fill" style="background-color: #28a745; width:{(dCatListovki/listovkiCount)*100}%">D кат. - {(dCatListovki/listovkiCount)*100}%</div>
+            <div class="bar-fill" style="background-color: #dc3545; width:{(aCatListovki/listovkiCount)*100}%">A кат. - {((aCatListovki/listovkiCount)*100).toFixed(1)}%</div>
+            <div class="bar-fill" style="background-color: #6f42c1; width:{(bCatListovki/listovkiCount)*100}%">B кат. - {((bCatListovki/listovkiCount)*100).toFixed(1)}%</div>
+            <div class="bar-fill" style="background-color: #17a2b8; width:{(cCatListovki/listovkiCount)*100}%">C кат. - {((cCatListovki/listovkiCount)*100).toFixed(1)}%</div>
+            <div class="bar-fill" style="background-color: #28a745; width:{(dCatListovki/listovkiCount)*100}%">D кат. - {((dCatListovki/listovkiCount)*100).toFixed(1)}%</div>
         </div>
     </div>
     <div class="smallwrapper" style="width:100%; height:54%;">
@@ -124,7 +124,9 @@
     .bar-fill {
         height:100%;
         display: flex;
+        flex-direction: row;
         justify-content: center;
+        flex-wrap: nowrap;
         align-items: center;
         text-align: center;
     }

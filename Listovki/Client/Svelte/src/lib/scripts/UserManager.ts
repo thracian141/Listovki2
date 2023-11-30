@@ -47,6 +47,23 @@ export async function getEmail() {
     return data.email;
 }
 
+export async function getInfo() {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
+    if (!cookie) {
+        return;
+    }
+
+    const token = cookie.split('=')[1];
+    const response = await fetch('https://localhost:5000/account/info', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    const data = await response.json();
+    return data.userinfo;
+}
+
 export async function isAdmin() {
     const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
     if (!cookie) {
