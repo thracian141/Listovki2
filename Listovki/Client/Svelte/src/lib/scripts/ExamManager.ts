@@ -192,6 +192,11 @@ export async function getExamByCategory(category: string) {
 
 export async function gradeExam(exam : ListovkaInputModel) {
     console.log(exam);
+    const requestBody = {
+        questions: exam.questions,
+        category: exam.category
+      };
+
     const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
     if (!cookie) {
         return;
@@ -203,7 +208,7 @@ export async function gradeExam(exam : ListovkaInputModel) {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(exam.questions)
+        body: JSON.stringify(requestBody)
     });
     const data = await response.text();
 
@@ -227,4 +232,22 @@ export async function results(listovkaId : number) {
     console.log(data);
     console.log(listovka);
     return listovka;
+}
+
+export async function stats() {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('token'));
+    if (!cookie) {
+        return;
+    }
+    const token = cookie.split('=')[1];
+    const response = await fetch('https://localhost:5000/exam/stats', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        }
+    });
+    const data = await response.json();
+    let stats = data.stats;
+    console.log(stats);
+    return stats;
 }

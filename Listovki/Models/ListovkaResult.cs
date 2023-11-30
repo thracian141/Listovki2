@@ -12,6 +12,8 @@ namespace Listovki.Models {
         [Required]
         public int GuessedQuestionsNumber { get; set; }
         [Required]
+        public string Category { get; set; }
+        [Required]
         public string UserEmail { get; set; }
         [ForeignKey("UserEmail")]
         public virtual AppUser User { get; set; }

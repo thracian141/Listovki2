@@ -53,6 +53,7 @@
 
         let newExam : ListovkaInputModel = {
             userId: await getEmail(),
+            category: data.test,
             questions: []
         };
 

@@ -34,8 +34,8 @@
                     </li>
                 {/if}
             {/await}
-            <li class="nav-item">
-                <a class="nav-link" href="/test">Gotov sait</a>
+            <li class="navbar-nav">
+                <a class="nav-link" href="/listovki/stats">Статистика</a>
             </li>
         </ul>
         <ul class="navbar-nav">
@@ -49,7 +49,7 @@
             {:else}
                 {#await usernamePromise then username}
                     <li class="nav-item">
-                        <a class="nav-link" href="/listovki/stats">Здравей, {username}!</a>
+                        <a class="nav-link" href="/listovki/stats">Здравейте, {username}!</a>
                     </li>
                 {/await}
                 <li class="nav-item">

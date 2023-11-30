@@ -104,19 +104,23 @@ namespace Listovki.Controllers {
             return new JsonResult(new {questions });
         }
         [HttpPost("gradeExam")]
-        public async Task<IActionResult> GradeExam([FromBody] List<QuestionMap> exam) {
+        public async Task<IActionResult> GradeExam([FromBody] ExamInputModel listovkaModel) {
             var user = await _userManager.GetUserAsync(User);
+            var exam = listovkaModel.Questions;
+
             ListovkaResult result = new ListovkaResult {
                 Id = 0,
                 PercentageRight = 0,
                 QuestionsNumber = 0,
                 GuessedQuestionsNumber = 0,
+                Category = "F",
                 UserEmail = user.Email,
                 User = user
             };
             double pointsTotal = 0;
             double pointsGuessed = 0;
             int questionsGuessedCount = 0;
+            string category = listovkaModel.Category;
 
             foreach (var question in exam) {
                 var itsQuestion = await _db.ExamQuestions.FindAsync(question.questionId);
@@ -149,6 +153,7 @@ namespace Listovki.Controllers {
             result.PercentageRight = grade;
             result.QuestionsNumber = exam.Count;
             result.GuessedQuestionsNumber = questionsGuessedCount;
+            result.Category = category;
 
             await _db.ListovkaResults.AddAsync(result);
             await _db.SaveChangesAsync();
@@ -167,6 +172,52 @@ namespace Listovki.Controllers {
             }
 
             return new JsonResult(new { listovka });
+        }
+        [HttpGet("stats")]
+        public async Task<IActionResult> Start()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                Dictionary<string, int> stats = new Dictionary<string, int>();
+                var listovki = await _db.ListovkaResults.Where(l => l.UserEmail == user.Email).ToListAsync();
+
+                if (listovki != null)
+                {
+                    int listovkiCount = listovki.Count;
+                    int verniListovki = listovki.Count(l => l.PercentageRight >= 89);
+
+                    int aCatListovki = listovki.Count(l => l.Category == "A");
+                    int bCatListovki = listovki.Count(l => l.Category == "B");
+                    int cCatListovki = listovki.Count(l => l.Category == "C");
+                    int dCatListovki = listovki.Count(l => l.Category == "D");
+
+                    int aCatVerniListovki = listovki.Count(l => l.Category == "A" && l.PercentageRight >= 89);
+                    int bCatVerniListovki = listovki.Count(l => l.Category == "B" && l.PercentageRight >= 89);
+                    int cCatVerniListovki = listovki.Count(l => l.Category == "C" && l.PercentageRight >= 89);
+                    int dCatVerniListovki = listovki.Count(l => l.Category == "D" && l.PercentageRight >= 89);
+
+                    int lastExamId = listovki.Last().Id;
+
+                    stats.Add("listovkiCount", listovkiCount);
+                    stats.Add("verniListovki", verniListovki);
+
+                    stats.Add("aCatListovki", aCatListovki);
+                    stats.Add("bCatListovki", bCatListovki);
+                    stats.Add("cCatListovki", cCatListovki);
+                    stats.Add("dCatListovki", dCatListovki);
+
+                    stats.Add("aCatVerniListovki", aCatVerniListovki);
+                    stats.Add("bCatVerniListovki", bCatVerniListovki);
+                    stats.Add("cCatVerniListovki", cCatVerniListovki);
+                    stats.Add("dCatVerniListovki", dCatVerniListovki);
+
+                    stats.Add("lastExamId", lastExamId);
+                }
+
+                return new JsonResult(new { stats });
+            }
+            return NoContent();
         }
     }
 }

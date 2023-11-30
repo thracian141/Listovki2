@@ -1,6 +1,7 @@
 <script lang="ts">
     import { getUsername } from "$lib/scripts/UserManager";
     import { onMount } from "svelte";
+    import {stats} from '$lib/scripts/ExamManager';
 
     let username : string = 'test';
     let listovkiCount : number = 10;
@@ -19,6 +20,22 @@
     let lastExamId : number = 0;
 
     onMount(async () => {
+        let dict: { [key: string]: number } | undefined = {};
+        dict = await stats();
+        if (dict != undefined) {
+            listovkiCount = dict["listovkiCount"];
+            verniListovki = dict["verniListovki"];
+            aCatListovki = dict["aCatListovki"];
+            bCatListovki = dict["bCatListovki"];
+            cCatListovki = dict["cCatListovki"];
+            dCatListovki = dict["dCatListovki"];
+            aCatVerniListovki = dict["aCatVerniListovki"];
+            bCatVerniListovki = dict["bCatVerniListovki"];
+            cCatVerniListovki = dict["cCatVerniListovki"];
+            dCatVerniListovki = dict["dCatVerniListovki"];
+            lastExamId = dict["lastExamId"];
+        }
+
         username = await getUsername();
     })
 </script>
@@ -36,9 +53,9 @@
         </div>
         <div class="bar" style="background-color: #ffffff;">
             <div class="bar-fill" style="background-color: #dc3545; width:{(aCatListovki/listovkiCount)*100}%">A кат. - {(aCatListovki/listovkiCount)*100}%</div>
-            <div class="bar-fill" style="background-color: #6f42c1; width:{(bCatListovki/listovkiCount)*100}%">B кат. -{(bCatListovki/listovkiCount)*100}%</div>
-            <div class="bar-fill" style="background-color: #17a2b8; width:{(cCatListovki/listovkiCount)*100}%">C кат. -{(cCatListovki/listovkiCount)*100}%</div>
-            <div class="bar-fill" style="background-color: #28a745; width:{(dCatListovki/listovkiCount)*100}%">D кат. -{(dCatListovki/listovkiCount)*100}%</div>
+            <div class="bar-fill" style="background-color: #6f42c1; width:{(bCatListovki/listovkiCount)*100}%">B кат. - {(bCatListovki/listovkiCount)*100}%</div>
+            <div class="bar-fill" style="background-color: #17a2b8; width:{(cCatListovki/listovkiCount)*100}%">C кат. - {(cCatListovki/listovkiCount)*100}%</div>
+            <div class="bar-fill" style="background-color: #28a745; width:{(dCatListovki/listovkiCount)*100}%">D кат. - {(dCatListovki/listovkiCount)*100}%</div>
         </div>
     </div>
     <div class="smallwrapper" style="width:100%; height:54%;">
@@ -48,14 +65,18 @@
                 <h3>A категория</h3>
                 <h4><span style="font-size:1.8rem;text-decoration: underline; text-decoration-style:dashed;">{aCatListovki}</span> решени листовки</h4>
                 <div class="bar" style="background-color: #dc3545;">
+                    {#if aCatListovki != 0}
                     <div class="bar-fill" style="background-color: #28a745; width:{((aCatVerniListovki/aCatListovki)*100).toFixed(1)}%">{((aCatVerniListovki/aCatListovki)*100).toFixed(1)}% верни</div>
+                    {/if}
                 </div>
             </div>
             <div class="verysmallwrapper">
                 <h3>B категория</h3>
                 <h4><span style="font-size:1.8rem;text-decoration: underline; text-decoration-style:dashed;">{bCatListovki}</span> решени листовки</h4>
                 <div class="bar" style="background-color: #dc3545;">
+                    {#if bCatListovki != 0}
                     <div class="bar-fill" style="background-color: #28a745; width:{((bCatVerniListovki/bCatListovki)*100).toFixed(1)}%">{((bCatVerniListovki/bCatListovki)*100).toFixed(1)}% верни</div>
+                    {/if}
                 </div>
             </div>
         </div>
@@ -64,14 +85,18 @@
                 <h3>C категория</h3>
                 <h4><span style="font-size:1.8rem;text-decoration: underline; text-decoration-style:dashed;">{cCatListovki}</span> решени листовки</h4>
                 <div class="bar" style="background-color: #dc3545;">
+                    {#if cCatListovki != 0}
                     <div class="bar-fill" style="background-color: #28a745; width:{((cCatVerniListovki/aCatListovki)*100).toFixed(1)}%">{((cCatVerniListovki/aCatListovki)*100).toFixed(1)}% верни</div>
+                    {/if}
                 </div>
             </div>
             <div class="verysmallwrapper">
                 <h3>D категория</h3>
                 <h4><span style="font-size:1.8rem;text-decoration: underline; text-decoration-style:dashed;">{dCatListovki}</span> решени листовки</h4>
                 <div class="bar" style="background-color: #dc3545;">
+                    {#if dCatListovki != 0}
                     <div class="bar-fill" style="background-color: #28a745; width:{((dCatVerniListovki/aCatListovki)*100).toFixed(1)}%">{((dCatVerniListovki/aCatListovki)*100).toFixed(1)}% верни</div>
+                    {/if}
                 </div>
             </div>
         </div>
